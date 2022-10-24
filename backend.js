@@ -12,7 +12,7 @@ const Filme = mongoose.model ("Filme", mongoose.Schema({
 }))
 
 async function conectarAoMongoDB() {
-  await mongoose.connect(`mongodb+srv://usuario:senha@cluster0.wttmkyk.mongodb.net/?retryWrites=true&w=majority`)
+  await mongoose.connect(`mongodb+srv://professorbossini:professorbossini@cluster0.wttmkyk.mongodb.net/?retryWrites=true&w=majority`)
 }
 
 
@@ -33,6 +33,10 @@ app.post("/filmes", async (req, res) => {
   const filmes = await Filme.find()
   res.json(filmes)
 })
+
+  app.post('/login', (req, res) => {
+    
+  })
 
 
 //GET http://localhost:3000/hey
