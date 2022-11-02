@@ -43,16 +43,11 @@ async function cadastrarFilme() {
       celulaTitulo.innerHTML = filme.titulo
       celulaSinopse.innerHTML = filme.sinopse
     }
+    exibirAlerta('.alert-filme', 'Filme cadastrado com sucesso', ['show', 'alert-success'], ['d-none'], 2000)
   }
-  //senão, exibe o alerta por até 2 segundos
+  //senão, exibe o alerta por pelo menos 2 segundos
   else {
-    let alert = document.querySelector('.alert')
-    alert.classList.add('show')
-    alert.classList.remove('d-none')
-    setTimeout(() => {
-      alert.classList.remove('show')
-      alert.classList.add('d-none')
-    }, 2000)
+    exibirAlerta('.alert-filme', 'Preencha todos os campos', ['show', 'alert-danger'], ['d-none'], 2000)
   }
 }
 
@@ -62,46 +57,80 @@ async function cadastrarUsuario(){
   let usuarioCadastro = usuarioCadastroInput.value
   let passwordCadastro = passwordCadastroInput.value
   if (usuarioCadastro && passwordCadastro) {
+    try{
     const cadastroEndpoint = '/signup'
     const URLCompleta = `${protocolo}${baseURL}${cadastroEndpoint}`
-    const resp = await axios.post(URLCompleta, { login: usuarioCadastro, password: passwordCadastro })
-    console.log(resp)
-    if(resp.status === 201){
+      await axios.post(URLCompleta, { login: usuarioCadastro, password: passwordCadastro })
       usuarioCadastroInput.value = ""
       passwordCadastroInput.value = ""
-      let alert = document.querySelector('.alert-modal-cadastro')
-      alert.innerHTML = "Usuário cadastrado com sucesso!"
-      alert.classList.add('show', 'alert-success')
-      alert.classList.remove('d-none')
-      setTimeout(() => {
-        alert.classList.remove('show')
-        alert.classList.add('d-none')
-        let modalCadastro = bootstrap.Modal.getInstance(document.querySelector('#modalCadastro'))
-        modalCadastro.hide()
-      }, 2000)
+      exibirAlerta('.alert-modal-cadastro', "Usuário cadastrado com sucesso!", ['show', 'alert-success'], ['d-none', 'alert-danger'], 2000)
+      ocultarModal('#modalLogin', 2000)
     }
-    else {
-      let alert = document.querySelector('.alert-modal-cadastro')
-      alert.innerHTML = "Não foi possível cadastrar"
-      alert.classList.add('show', 'alert-danger')
-      alert.classList.remove('d-none')
-      setTimeout(() => {
-        alert.classList.remove('show')
-        alert.classList.add('d-none')
-        let modalCadastro = bootstrap.Modal.getInstance(document.querySelector('#modalCadastro'))
-        modalCadastro.hide()
-      }, 2000)
+    catch(error){
+      exibirAlerta('.alert-modal-cadastro', "Erro ao cadastrar usuário", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
+      ocultarModal('#modalLogin', 2000)
     }
   }
   else{
-    let alert = document.querySelector('.alert-modal-cadastro')
-    alert.innerHTML = "Preencha todos os campos"
-    alert.classList.add('show', 'alert-danger')
-    alert.classList.remove('d-none')
-    setTimeout(() => {
-      alert.classList.remove('show')
-      alert.classList.add('d-none')
-    }, 2000)
+    exibirAlerta('.alert-modal-cadastro', 'Preencha todos os campos', ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
   }
+}
+
+//fora de qualquer outra função, pode ser no final, depois de todas
+function exibirAlerta(seletor, innerHTML, classesToAdd, classesToRemove, timeout){
+  let alert = document.querySelector(seletor)
+  alert.innerHTML = innerHTML
+  //... é o spread operator
+  //quando aplicado a um array, ele "desmembra" o array
+  //depois disso, passamos os elementos do array como argumentos para add e remove
+  alert.classList.add(...classesToAdd)
+  alert.classList.remove(...classesToRemove)
+  setTimeout(() => {
+    alert.classList.remove('show')
+    alert.classList.add('d-none')
+  }, timeout)
+}
+
+//só para ver que é possível, vamos definir essa função como um arrow function
+//esse construção é análoga a
+//async function fazerLogin(){}
+//há algumas diferenças, mas não vamos entrar em detalhes agora
+const fazerLogin = async () => {
+  let usuarioLoginInput = document.querySelector('#usuarioLoginInput')
+  let passwordLoginInput = document.querySelector('#passwordLoginInput')
+  let usuarioLogin = usuarioLoginInput.value
+  let passwordLogin = passwordLoginInput.value
+  if (usuarioLogin && passwordLogin) {
+    try{
+      const loginEndpoint = '/login'
+      const URLCompleta = `${protocolo}${baseURL}${loginEndpoint}`
+      //já já vamos fazer algo com a resposta (pegar o token)
+      const response = await axios.post(URLCompleta, { login: usuarioLogin, password: passwordLogin })
+      console.log(response.data)
+      usuarioLoginInput.value = ""
+      passwordLoginInput.value = ""
+      exibirAlerta('.alert-modal-login', "Login efetuado com sucesso!", ['show', 'alert-success'], ['d-none', 'alert-danger'],2000)
+      ocultarModal('#modalLogin', 2000)
+      const loginLink = document.querySelector('#loginLink')
+      loginLink.innerHTML = "Logout"
+      const cadastrarFilmeButton = document.querySelector('#cadastrarFilmeButton')
+      cadastrarFilmeButton.disabled = false
+    }
+    catch(error){
+      console.log(error)
+      //daqui a pouco fazemos o tratamento de coisas ruins, ou seja, especificamos o fluxo alternativo de execução
+      exibirAlerta('.alert-modal-login', "Erro ao fazer login", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
+    }
+  }
+  else{
+    exibirAlerta('.alert-modal-login', 'Preencha todos os campos', ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)    
+  }
+}
+
+function ocultarModal(seletor, timeout){
+  setTimeout(() => {
+    let modal = bootstrap.Modal.getInstance(document.querySelector(seletor))
+    modal.hide()
+  }, timeout)
 }
 
