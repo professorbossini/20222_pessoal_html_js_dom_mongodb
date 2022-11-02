@@ -45,7 +45,6 @@ app.post("/filmes", async (req, res) => {
 
 app.post('/signup', async (req, res) => {
   try {
-
     const login = req.body.login
     const password = req.body.password
     const criptografada = await bcrypt.hash(password, 10)
